@@ -1,1 +1,776 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оцінка уроку</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --card-hover: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #2f81f7;
+      --green: #238636;
+      --red: #da3633;
+      --yellow: #d29922;
+    }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 14px 60px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.95rem;
+      margin-bottom: 22px;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .emoji-btn {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 12px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .emoji-btn:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .emoji-btn:active {
+      transform: scale(0.96);
+    }
+
+    .emoji-btn .icon {
+      font-size: 3.2rem;
+      line-height: 1;
+    }
+
+    .emoji-btn .label {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .status-box {
+      text-align: center;
+      padding: 30px 12px;
+    }
+
+    .status-box .big-icon {
+      font-size: 3.8rem;
+      margin-bottom: 14px;
+    }
+
+    .status-box p {
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    .input:focus {
+      border-color: var(--accent);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 11px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-green { background: var(--green); }
+    .btn-red { background: var(--red); }
+    .btn-gray { background: #30363d; color: var(--text); }
+    .btn-small { padding: 7px 12px; font-size: 0.85rem; }
+    .btn-full { width: 100%; }
+
+    .stat-row {
+      margin-bottom: 12px;
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      margin-bottom: 5px;
+    }
+
+    .bar-bg {
+      width: 100%;
+      height: 12px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.35s ease;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-open { background: rgba(35, 134, 54, 0.25); color: #3fb950; border: 1px solid #238636; }
+    .badge-closed { background: rgba(218, 54, 51, 0.2); color: #f85149; border: 1px solid #da3633; }
+
+    .history-item {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .history-meta {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 3px;
+    }
+
+    .history-details {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+
+    .history-details.open {
+      display: block;
+    }
+
+    .qr-box {
+      text-align: center;
+      margin-top: 16px;
+      padding: 16px;
+      background: #ffffff;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .qr-box.show {
+      display: block;
+    }
+
+    .qr-box img {
+      max-width: 210px;
+      display: block;
+      margin: 0 auto 8px;
+    }
+
+    .qr-box p {
+      color: #111;
+      font-size: 0.85rem;
+      word-break: break-all;
+    }
+
+    .footer-link {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .footer-link button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- ЕКРАН УЧНЯ -->
+  <div id="studentView" class="card">
+    <div id="studentLoading" class="status-box">
+      <div class="big-icon">⏳</div>
+      <h2>Завантаження...</h2>
+    </div>
+
+    <div id="studentPoll" class="hidden">
+      <h1 id="pollTitle">Як пройшов урок?</h1>
+      <div id="pollDate" class="subtitle"></div>
+
+      <div id="voteButtons" class="emoji-grid">
+        <button class="emoji-btn" onclick="submitVote('great')">
+          <span class="icon">😍</span>
+          <span class="label">Супер</span>
+        </button>
+        <button class="emoji-btn" onclick="submitVote('good')">
+          <span class="icon">🙂</span>
+          <span class="label">Добре</span>
+        </button>
+        <button class="emoji-btn" onclick="submitVote('ok')">
+          <span class="icon">😐</span>
+          <span class="label">Так собі</span>
+        </button>
+        <button class="emoji-btn" onclick="submitVote('bad')">
+          <span class="icon">😕</span>
+          <span class="label">Погано</span>
+        </button>
+      </div>
+
+      <div id="alreadyVotedBox" class="status-box hidden">
+        <div id="chosenEmoji" class="big-icon">✅</div>
+        <h2>Дякую! Твою оцінку враховано</h2>
+        <p>Повторно проголосувати в цьому опитуванні не можна.</p>
+      </div>
+
+      <div id="closedBox" class="status-box hidden">
+        <div class="big-icon">🔒</div>
+        <h2>Голосування закрито</h2>
+        <p>Вчитель уже завершив збір відповідей за цей урок.</p>
+      </div>
+    </div>
+
+    <div id="noPollBox" class="status-box hidden">
+      <div class="big-icon">📋</div>
+      <h2>Поки що немає активного опитування</h2>
+      <p>Зачекай, поки вчитель запустить оцінювання уроку.</p>
+    </div>
+  </div>
+
+  <!-- ВХІД ДЛЯ ВЧИТЕЛЯ -->
+  <div id="adminLoginView" class="card hidden">
+    <h1>Кабінет вчителя</h1>
+    <p class="subtitle">Введіть email та пароль вчителя</p>
+    <input type="email" id="emailInput" class="input" placeholder="Email вчителя" autocomplete="username">
+    <input type="password" id="passwordInput" class="input" placeholder="Пароль" autocomplete="current-password">
+    <div class="row">
+      <button id="loginBtn" class="btn btn-full" onclick="loginAdmin()">Увійти</button>
+      <button class="btn btn-gray btn-full" onclick="showStudentMode()">Назад до голосування</button>
+    </div>
+    <p id="loginError" style="color:#f85149; text-align:center; margin-top:10px; font-size:0.9rem;" class="hidden"></p>
+  </div>
+
+  <!-- ПАНЕЛЬ ВЧИТЕЛЯ -->
+  <div id="adminView" class="hidden">
+    <div class="card">
+      <div class="row" style="justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="margin:0;">👨‍🏫 Кабінет вчителя</h2>
+        <div class="row">
+          <button class="btn btn-gray btn-small" onclick="showStudentMode()">Екран учня</button>
+          <button class="btn btn-red btn-small" onclick="logoutAdmin()">Вийти</button>
+        </div>
+      </div>
+
+      <label style="display:block; margin-bottom:6px; color:var(--muted); font-size:0.9rem;">Створити нове опитування (новий урок / день):</label>
+      <input type="text" id="newPollTitle" class="input" placeholder="Наприклад: Як пройшов урок?">
+      <input type="date" id="newPollDate" class="input">
+      <button class="btn btn-green btn-full" onclick="createNewPoll()">➕ Створити та запустити</button>
+    </div>
+
+    <!-- Поточне активне опитування -->
+    <div id="activePollAdminCard" class="card hidden">
+      <div class="row" style="justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 style="margin:0;" id="adminActiveTitle">Поточний урок</h2>
+        <span id="adminStatusBadge" class="badge badge-open">Відкрито</span>
+      </div>
+      <div id="adminActiveDate" style="color:var(--muted); font-size:0.9rem; margin-bottom: 16px;"></div>
+
+      <div id="activeStatsContainer"></div>
+      <div id="activeTotalVotes" style="color:var(--muted); font-size:0.9rem; margin: 12px 0 16px;"></div>
+
+      <div class="row">
+        <button id="toggleOpenBtn" class="btn btn-red" onclick="togglePollStatus()">🔒 Закрити голосування</button>
+        <button class="btn btn-gray" onclick="copyStudentLink()">🔗 Копіювати посилання</button>
+        <button class="btn btn-gray" onclick="toggleQR()">📱 QR-код</button>
+      </div>
+
+      <div id="qrBox" class="qr-box">
+        <img id="qrImage" src="" alt="QR-код">
+        <p id="qrLinkText"></p>
+      </div>
+    </div>
+
+    <!-- Історія попередніх днів -->
+    <div class="card">
+      <h2>📅 Історія попередніх днів</h2>
+      <div id="historyList">
+        <p style="color:var(--muted);">Історія поки порожня.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="footerTeacherLink" class="footer-link">
+    <button onclick="openAdminGate()">Вхід для вчителя</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAh5sXuSGC6vA89ItNjoLCBMsM8HmZhXIM",
+    authDomain: "urok-smiles.firebaseapp.com",
+    databaseURL: "https://urok-smiles-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "urok-smiles",
+    storageBucket: "urok-smiles.firebasestorage.app",
+    messagingSenderId: "53571418500",
+    appId: "1:53571418500:web:62bf8e2b0ad1768fb0c5d1"
+  };
+
+  const EMOJIS = [
+    { key: "great", icon: "😍", label: "Супер", color: "#2ea043" },
+    { key: "good",  icon: "🙂", label: "Добре", color: "#2f81f7" },
+    { key: "ok",    icon: "😐", label: "Так собі", color: "#d29922" },
+    { key: "bad",   icon: "😕", label: "Погано", color: "#f85149" }
+  ];
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+
+  let globalData = { activePollId: null, polls: {} };
+  let isAdminMode = false;
+  let currentUser = null;
+  let wantsAdmin = window.location.search.includes("admin");
+
+  document.getElementById("newPollDate").value = new Date().toISOString().split("T")[0];
+
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
+    if (wantsAdmin) {
+      wantsAdmin = false;
+      openAdminGate();
+    } else if (isAdminMode && !user) {
+      showStudentMode();
+    }
+  });
+
+  db.ref().on("value", (snapshot) => {
+    const val = snapshot.val() || {};
+    globalData = {
+      activePollId: val.activePollId || null,
+      polls: val.polls || {}
+    };
+    renderStudentView();
+    if (isAdminMode) renderAdminView();
+  });
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text || "";
+    return div.innerHTML;
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) return dateStr;
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  }
+
+  // ---------------- ЛОГІКА УЧНЯ ----------------
+  function renderStudentView() {
+    document.getElementById("studentLoading").classList.add("hidden");
+
+    const activeId = globalData.activePollId;
+    const poll = activeId ? globalData.polls[activeId] : null;
+
+    if (!poll) {
+      document.getElementById("studentPoll").classList.add("hidden");
+      document.getElementById("noPollBox").classList.remove("hidden");
+      return;
+    }
+
+    document.getElementById("noPollBox").classList.add("hidden");
+    document.getElementById("studentPoll").classList.remove("hidden");
+    document.getElementById("pollTitle").textContent = poll.title;
+    document.getElementById("pollDate").textContent = formatDate(poll.date);
+
+    const savedVote = localStorage.getItem("voted_" + activeId);
+    const voteButtons = document.getElementById("voteButtons");
+    const alreadyVotedBox = document.getElementById("alreadyVotedBox");
+    const closedBox = document.getElementById("closedBox");
+
+    if (savedVote) {
+      voteButtons.classList.add("hidden");
+      closedBox.classList.add("hidden");
+      alreadyVotedBox.classList.remove("hidden");
+      const found = EMOJIS.find(e => e.key === savedVote);
+      document.getElementById("chosenEmoji").textContent = found ? found.icon : "✅";
+    } else if (!poll.isOpen) {
+      voteButtons.classList.add("hidden");
+      alreadyVotedBox.classList.add("hidden");
+      closedBox.classList.remove("hidden");
+    } else {
+      alreadyVotedBox.classList.add("hidden");
+      closedBox.classList.add("hidden");
+      voteButtons.classList.remove("hidden");
+    }
+  }
+
+  function submitVote(choiceKey) {
+    const activeId = globalData.activePollId;
+    const poll = activeId ? globalData.polls[activeId] : null;
+    if (!poll || !poll.isOpen) return;
+
+    if (localStorage.getItem("voted_" + activeId)) {
+      renderStudentView();
+      return;
+    }
+
+    localStorage.setItem("voted_" + activeId, choiceKey);
+    renderStudentView();
+
+    db.ref(`polls/${activeId}/votes/${choiceKey}`)
+      .set(firebase.database.ServerValue.increment(1))
+      .catch(() => {
+        localStorage.removeItem("voted_" + activeId);
+        renderStudentView();
+        alert("Не вдалося зберегти голос. Можливо, вчитель уже закрив опитування.");
+      });
+  }
+
+  // ---------------- ЛОГІКА ВЧИТЕЛЯ ----------------
+  function openAdminGate() {
+    document.getElementById("studentView").classList.add("hidden");
+    document.getElementById("footerTeacherLink").classList.add("hidden");
+
+    if (currentUser) {
+      enterAdminPanel();
+    } else {
+      document.getElementById("adminLoginView").classList.remove("hidden");
+      document.getElementById("loginError").classList.add("hidden");
+      document.getElementById("emailInput").focus();
+    }
+  }
+
+  function loginAdmin() {
+    const email = document.getElementById("emailInput").value.trim();
+    const password = document.getElementById("passwordInput").value;
+    const errorEl = document.getElementById("loginError");
+    const btn = document.getElementById("loginBtn");
+
+    if (!email || !password) {
+      errorEl.textContent = "Введи email і пароль.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Вхід...";
+    errorEl.classList.add("hidden");
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        document.getElementById("passwordInput").value = "";
+        enterAdminPanel();
+      })
+      .catch(() => {
+        errorEl.textContent = "Неправильний email або пароль.";
+        errorEl.classList.remove("hidden");
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.textContent = "Увійти";
+      });
+  }
+
+  document.getElementById("passwordInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") loginAdmin();
+  });
+
+  function enterAdminPanel() {
+    isAdminMode = true;
+    document.getElementById("adminLoginView").classList.add("hidden");
+    document.getElementById("studentView").classList.add("hidden");
+    document.getElementById("adminView").classList.remove("hidden");
+    renderAdminView();
+  }
+
+  function showStudentMode() {
+    isAdminMode = false;
+    document.getElementById("adminLoginView").classList.add("hidden");
+    document.getElementById("adminView").classList.add("hidden");
+    document.getElementById("studentView").classList.remove("hidden");
+    document.getElementById("footerTeacherLink").classList.remove("hidden");
+    renderStudentView();
+  }
+
+  function logoutAdmin() {
+    auth.signOut().then(() => {
+      showStudentMode();
+    });
+  }
+
+  function handleDbError(err) {
+    alert("Помилка доступу до бази!\n\n" + err.message);
+  }
+
+  function createNewPoll() {
+    const titleInput = document.getElementById("newPollTitle");
+    const dateInput = document.getElementById("newPollDate");
+
+    const title = titleInput.value.trim() || "Як пройшов урок?";
+    const date = dateInput.value || new Date().toISOString().split("T")[0];
+    const id = "poll_" + Date.now();
+
+    const newPoll = {
+      id: id,
+      title: title,
+      date: date,
+      createdAt: Date.now(),
+      isOpen: true,
+      votes: { great: 0, good: 0, ok: 0, bad: 0 }
+    };
+
+    const updates = {};
+    updates[`polls/${id}`] = newPoll;
+    updates["activePollId"] = id;
+
+    db.ref().update(updates)
+      .then(() => { titleInput.value = ""; })
+      .catch(handleDbError);
+  }
+
+  function togglePollStatus() {
+    const activeId = globalData.activePollId;
+    const poll = activeId ? globalData.polls[activeId] : null;
+    if (!poll) return;
+
+    db.ref(`polls/${activeId}/isOpen`).set(!poll.isOpen).catch(handleDbError);
+  }
+
+  function makePollActive(pollId) {
+    const updates = {};
+    updates["activePollId"] = pollId;
+    updates[`polls/${pollId}/isOpen`] = true;
+    db.ref().update(updates).catch(handleDbError);
+  }
+
+  function deletePoll(pollId) {
+    if (!confirm("Точно видалити це опитування з історії?")) return;
+
+    const updates = {};
+    updates[`polls/${pollId}`] = null;
+    if (globalData.activePollId === pollId) {
+      updates["activePollId"] = null;
+    }
+    db.ref().update(updates).catch(handleDbError);
+  }
+
+  function buildStatsHtml(votesObj) {
+    const votes = votesObj || {};
+    const total = EMOJIS.reduce((sum, e) => sum + (votes[e.key] || 0), 0);
+
+    let html = "";
+    EMOJIS.forEach((e) => {
+      const count = votes[e.key] || 0;
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      html += `
+        <div class="stat-row">
+          <div class="stat-header">
+            <span>${e.icon} ${e.label}</span>
+            <span><strong>${count}</strong> (${pct}%)</span>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill" style="width:${pct}%; background:${e.color};"></div>
+          </div>
+        </div>
+      `;
+    });
+
+    return { html, total };
+  }
+
+  function renderAdminView() {
+    const activeId = globalData.activePollId;
+    const activePoll = activeId ? globalData.polls[activeId] : null;
+    const activeCard = document.getElementById("activePollAdminCard");
+
+    if (activePoll) {
+      activeCard.classList.remove("hidden");
+      document.getElementById("adminActiveTitle").textContent = activePoll.title;
+      document.getElementById("adminActiveDate").textContent = "Дата: " + formatDate(activePoll.date);
+
+      const badge = document.getElementById("adminStatusBadge");
+      const toggleBtn = document.getElementById("toggleOpenBtn");
+
+      if (activePoll.isOpen) {
+        badge.textContent = "🟢 Відкрито";
+        badge.className = "badge badge-open";
+        toggleBtn.textContent = "🔒 Закрити голосування";
+        toggleBtn.className = "btn btn-red";
+      } else {
+        badge.textContent = "🔴 Закрито";
+        badge.className = "badge badge-closed";
+        toggleBtn.textContent = "🔓 Відкрити знову";
+        toggleBtn.className = "btn btn-green";
+      }
+
+      const stats = buildStatsHtml(activePoll.votes);
+      document.getElementById("activeStatsContainer").innerHTML = stats.html;
+      document.getElementById("activeTotalVotes").textContent = `Всього проголосувало: ${stats.total}`;
+    } else {
+      activeCard.classList.add("hidden");
+    }
+
+    const historyContainer = document.getElementById("historyList");
+    const allPolls = Object.values(globalData.polls || {}).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+    if (allPolls.length === 0) {
+      historyContainer.innerHTML = `<p style="color:var(--muted);">Історія поки порожня. Створи перше опитування вище.</p>`;
+      return;
+    }
+
+    historyContainer.innerHTML = allPolls.map((p) => {
+      const stats = buildStatsHtml(p.votes);
+      const isCurrent = p.id === activeId;
+      const v = p.votes || {};
+      const miniSummary = `😍 ${v.great || 0} &nbsp; 🙂 ${v.good || 0} &nbsp; 😐 ${v.ok || 0} &nbsp; 😕 ${v.bad || 0}`;
+
+      return `
+        <div class="history-item">
+          <div class="history-top" onclick="toggleHistoryDetails('${p.id}')">
+            <div>
+              <strong>${escapeHtml(p.title)}</strong> ${isCurrent ? '<span class="badge badge-open" style="margin-left:6px;">Зараз активне</span>' : ''}
+              <div class="history-meta">${formatDate(p.date)} • Голосів: ${stats.total} • ${miniSummary}</div>
+            </div>
+            <span style="color:var(--muted); font-size:1.2rem;">▾</span>
+          </div>
+
+          <div id="details_${p.id}" class="history-details">
+            ${stats.html}
+            <div class="row" style="margin-top: 12px;">
+              ${!isCurrent ? `<button class="btn btn-gray btn-small" onclick="makePollActive('${p.id}')">Зробити активним</button>` : ''}
+              <button class="btn btn-red btn-small" onclick="deletePoll('${p.id}')">Видалити</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function toggleHistoryDetails(pollId) {
+    const el = document.getElementById("details_" + pollId);
+    if (el) el.classList.toggle("open");
+  }
+
+  function getStudentUrl() {
+    return window.location.origin + window.location.pathname;
+  }
+
+  function copyStudentLink() {
+    const url = getStudentUrl();
+    navigator.clipboard.writeText(url).then(() => {
+      alert("Посилання для учнів скопійовано:\n" + url);
+    }).catch(() => {
+      prompt("Скопіюй посилання вручну:", url);
+    });
+  }
+
+  function toggleQR() {
+    const box = document.getElementById("qrBox");
+    const url = getStudentUrl();
+    document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
+    document.getElementById("qrLinkText").textContent = url;
+    box.classList.toggle("show");
+  }
+</script>
+</body>
+</html>
